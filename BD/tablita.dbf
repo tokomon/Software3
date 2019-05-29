@@ -1,0 +1,6 @@
+nombre string
+apellido string
+edad int
+------
+[angie,valeriano,22] 
+[rorro vilca 23],[spencer,aragon,23] 
