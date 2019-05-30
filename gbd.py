@@ -1,10 +1,15 @@
+#Gestor de Base de datos python3
+
 from shutil import copyfile
 from random import randint, uniform,random
+
 """
     para copiar archivos se usa esa libreria con el comando
     copyfile(fuente_origen, fuente_destino)
 """
 
+#Funcion para crear un tabla nueva donde se ingresan el nombre y las columnas
+#Ejm. create table nombreTabla (columna tipo)
 def tablaNueva(nombre, columnas):
     ruta = 'BD/' + nombre + '.dbf'
     archivo = open(ruta, 'w')
@@ -14,6 +19,8 @@ def tablaNueva(nombre, columnas):
     archivo.close()
     print('tabla creada correctamente!')
 
+#Funcion para insertar datos a una tabla existente
+#Ejm. insert nombreTabla (elemento1, elemento2, ...)
 def insertar(nombre, elementos):
     ruta = 'BD/' + nombre + '.dbf'
     archivo = open(ruta, 'a')
@@ -23,28 +30,30 @@ def insertar(nombre, elementos):
     archivo.close()
     print("insertado!")
 
+#Funcion para insertar n datos a una tabla existente por medio de un for
 def insert_n(nombre, elementos, n):
     for i in range(1, n+1):
         elementos[0] = str(i)
         elementos[1] = "'nombre_" + str(i) + "'"
-        elementos[2] = str(randint(0,100)) 
-        insertar(nombre, elementos)    
+        elementos[2] = str(randint(0,100))
+        insertar(nombre, elementos)
 
+#Funcion para borrar datos de una tabla existente
+#Ejm. delete nombreTabla where condicion
 def borrar(nombre, condicion):
     ruta = 'BD/' + nombre + '.dbf'
     archivo = open(ruta, 'r+')
     lineas = archivo.readlines()
-
     aux = 0
     aux2 = 0
-    cabecera = lineas[aux]    
+    cabecera = lineas[aux]
     while cabecera != '------\n':
         datos = cabecera.split()
         aux2 += 1
         if datos[0] == condicion[0]:
             aux = aux2-1
         cabecera = lineas[aux2]
-    
+
     archivo.seek(0)
     contLinea = 0
     flag = True
@@ -57,7 +66,7 @@ def borrar(nombre, condicion):
             if condicion[1] == '=':
                 if arrLinea[aux] != condicion[2]:
                     archivo.write(linea)
-                else: 
+                else:
                     flag = False
     archivo.truncate()
     archivo.close()
@@ -65,27 +74,26 @@ def borrar(nombre, condicion):
         print("no existe la fila")
     else :
         print("borrado!")
-    
+
+#Funcion para seleccionar datos de una tabla existente con una condicion dada
+#Ejm. select nombreTabla where condicion
 def select(nombre, condicion):
+    aux = 0
+    aux2 = 0
+    cabecera = lineas[aux]
+    guia = ''
     ruta = 'BD/' + nombre + '.dbf'
     archivo = open(ruta, 'r')
     lineas = archivo.readlines()
-
-    aux = 0
-    aux2 = 0
-    cabecera = lineas[aux] 
-    guia = ''   
     while cabecera != '------\n':
         datos = cabecera.split()
         aux2 += 1
         if datos[0] == condicion[0]:
             aux = aux2-1
         cabecera = lineas[aux2]
-
         guia += datos[0] + '|'
-    
-    print(guia)
 
+    print(guia)
     contLinea = 0
     for linea in lineas:
         if contLinea <= aux2:
@@ -111,18 +119,19 @@ def select(nombre, condicion):
             elif condicion[1] == '>=':
                 if arrLinea[aux] >= condicion[2]:
                     print(linea[:-1])
-            
+
     archivo.close()
 
+#Funcion para actualizar datos de una tabla existente con una condicion dada
+#Ejm. update nombreTabla set nuevosValores where condicion
 def update(nombre, actualizacion, condicion):
-    ruta = 'BD/' + nombre + '.dbf'
-    archivo = open(ruta, 'r+')
-    lineas = archivo.readlines()
-
     auxc = 0
     auxa = 0
     aux2 = 0
-    cabecera = lineas[auxc]    
+    cabecera = lineas[auxc]
+    ruta = 'BD/' + nombre + '.dbf'
+    archivo = open(ruta, 'r+')
+    lineas = archivo.readlines()
     while cabecera != '------\n':
         datos = cabecera.split()
         aux2 += 1
@@ -182,11 +191,9 @@ def update(nombre, actualizacion, condicion):
                     arrLinea[auxa] = actualizacion[1]
                     nLinea = ' '.join(arrLinea)
                     archivo.write(nLinea + '\n')
-                    
     archivo.truncate()
     archivo.close()
     print("actualizado!")
-
 
 
 print("COMANDOS:")
@@ -201,16 +208,17 @@ print("update [tabla] set [a_actualizar] where [condicion]")
 # elementos.append('nombre_x')
 # elementos.append('0')
 # insert_n('estudiantes', elementos, 500)
+
 while(1):
     comando = input()
     comando = comando.split()
     size = len(comando)
-    comando[size-1] = comando[size-1].replace(';', '')    
+    comando[size-1] = comando[size-1].replace(';', '')
     # create table [nombre] (columna tipo);
     if comando[0] == 'create' and comando[1] == 'table':
         nombreTabla = comando[2]
         cols = []
-        comando[3] = comando[3][1:] #borra ( 
+        comando[3] = comando[3][1:] #borra (
         for i in range(3, size):
             if comando[i][len(comando[i])-1].find(',') >= 0 or comando[i][len(comando[i])-1].find(')') >= 0:
                 comando[i] = comando[i][:-1]
@@ -227,8 +235,8 @@ while(1):
         for i in range(2, size):
                 elms.append(comando[i][:-1])
         insertar(nombreTabla, elms)
-    
-    # for_insert [n] [nombre_tabla] [condicion] 
+
+    # for_insert [n] [nombre_tabla] [condicion]
     elif comando[0] == 'for_insert':
         n = int(comando[1])
         nombre = comando[2]
@@ -245,7 +253,7 @@ while(1):
         for i in range(3, size):
             cndn.append(comando[i])
         borrar(nombreTabla, cndn)
-    
+
     # select [tabla] where [condicion]
     elif comando[0] == 'select': #considerar que la condicion va separada por ' '
         nombreTabla = comando[1]
@@ -253,7 +261,7 @@ while(1):
         for i in range(3, size):
             cndn.append(comando[i])
         select(nombreTabla, cndn)
-    
+
     # update [tabla] set [a_actualizar] where [condicion]
     elif comando[0] == 'update':
         nombreTabla = comando[1]
@@ -264,8 +272,5 @@ while(1):
         for i in range(7, size):
             cndn.append(comando[i])
         update(nombreTabla, actu, cndn)
-
     else:
         print("comando no encontrado, pruebe otra vez")
-
-
